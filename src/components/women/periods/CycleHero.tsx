@@ -1,10 +1,47 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Platform } from "react-native";
 import { WebView } from "react-native-webview";
 import { PeriodAnalysis, PeriodEntry } from "../../../api/women";
 import { toStr, daysFromToday } from "../../../utils/dates";
 import { CYCLE_HTML } from "./cycleHtml";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+// Web par WebView nahi chalta, isliye wahan iframe; phone par WebView hi
+function HtmlView({ html, style }: { html: string; style?: any }) {
+  if (Platform.OS === "web") {
+    return (
+      <View style={[{ overflow: "hidden" }, style]}>
+        <iframe
+          srcDoc={html}
+          title="animation"
+          scrolling="no"
+          style={{
+            width: "100%",
+            height: "100%",
+            border: "none",
+            display: "block",
+            background: "transparent",
+            pointerEvents: "none",
+          }}
+        />
+      </View>
+    );
+  }
+
+  return (
+    <WebView
+      originWhitelist={["*"]}
+      source={{ html }}
+      style={style}
+      scrollEnabled={false}
+      bounces={false}
+      javaScriptEnabled
+      opaque={false}
+      showsVerticalScrollIndicator={false}
+      showsHorizontalScrollIndicator={false}
+    />
+  );
+}
 
 // "2026-10-19" mein n din jodo
 const addDays = (s: string, n: number) => {
@@ -66,17 +103,7 @@ export default function CycleHero({ analysis: a, periods }: Props) {
         {/* pointerEvents none: animation scroll ko na roke */}
         <View style={s.videoWrap} pointerEvents="none">
           {hasHtml ? (
-            <WebView
-              originWhitelist={["*"]}
-              source={{ html: CYCLE_HTML }}
-              style={s.web}
-              scrollEnabled={false}
-              bounces={false}
-              javaScriptEnabled
-              opaque={false}
-              showsVerticalScrollIndicator={false}
-              showsHorizontalScrollIndicator={false}
-            />
+            <HtmlView html={CYCLE_HTML} style={s.web} />
           ) : (
             <View style={s.fallback}>
               <Text style={{ fontSize: 80 }}>💧</Text>

@@ -1,7 +1,44 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Platform } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { WebView } from "react-native-webview";
 import { HERO_HTML } from "./heroHtml";
+
+// Web par WebView nahi chalta, isliye wahan iframe; phone par WebView hi
+function HtmlView({ html, style }: { html: string; style?: any }) {
+  if (Platform.OS === "web") {
+    return (
+      <View style={[{ overflow: "hidden" }, style]}>
+        <iframe
+          srcDoc={html}
+          title="animation"
+          scrolling="no"
+          style={{
+            width: "100%",
+            height: "100%",
+            border: "none",
+            display: "block",
+            background: "transparent",
+            pointerEvents: "none",
+          }}
+        />
+      </View>
+    );
+  }
+
+  return (
+    <WebView
+      originWhitelist={["*"]}
+      source={{ html }}
+      style={style}
+      scrollEnabled={false}
+      bounces={false}
+      javaScriptEnabled
+      opaque={false}
+      showsVerticalScrollIndicator={false}
+      showsHorizontalScrollIndicator={false}
+    />
+  );
+}
 
 type Props = {
   name: string;
@@ -32,17 +69,7 @@ export default function WomenHero({ name, chip }: Props) {
       {/* pointerEvents none: the animation must not block scrolling */}
       <View style={s.right} pointerEvents="none">
         {hasHtml ? (
-          <WebView
-            originWhitelist={["*"]}
-            source={{ html: HERO_HTML }}
-            style={s.web}
-            scrollEnabled={false}
-            bounces={false}
-            javaScriptEnabled
-            opaque={false}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-          />
+          <HtmlView html={HERO_HTML} style={s.web} />
         ) : (
           <Text style={s.fallback}>🏃‍♀️</Text>
         )}
